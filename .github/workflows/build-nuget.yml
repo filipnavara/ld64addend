@@ -24,5 +24,5 @@ jobs:
         env:
           token: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          dotnet nuget add source https://nuget.pkg.github.com/emclient/index.json -n github
+          dotnet nuget add source https://nuget.pkg.github.com/filipnavara/index.json -n github
           dotnet nuget push '.artifacts/*.nupkg' -s github --api-key ${{ secrets.GITHUB_TOKEN }}
