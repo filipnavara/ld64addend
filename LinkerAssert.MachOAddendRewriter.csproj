@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NoBuild>true</NoBuild>
+    <IsPackable>true</IsPackable>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <PackageId>LinkerAssert.MachOAddendRewriter</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>GitHub Copilot</Authors>
+    <Description>Runs macho_addend_rewriter on NativeAOT ILC outputs after IlcCompile to work around the Xcode Mach-O linker large-addend assertion.</Description>
+    <PackageTags>nativeaot;ilc;macho;linker;xcode</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageOutputPath>artifacts</PackageOutputPath>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="buildTransitive/LinkerAssert.MachOAddendRewriter.targets"
+          Pack="true"
+          PackagePath="buildTransitive/LinkerAssert.MachOAddendRewriter.targets" />
+    <None Include="README.md"
+          Pack="true"
+          PackagePath="README.md" />
+    <None Include="$(IntermediateOutputPath)macho_addend_rewriter"
+          Pack="true"
+          PackagePath="tools/"
+          Visible="false"
+          Condition="Exists('$(IntermediateOutputPath)macho_addend_rewriter')" />
+  </ItemGroup>
+
+  <Target Name="BuildMachOAddendRewriter" BeforeTargets="GenerateNuspec">
+    <MakeDir Directories="$(IntermediateOutputPath)" />
+    <Exec Command="clang -Wall -Wextra -Werror -std=c11 -O2 -arch arm64 -arch x86_64 -o &quot;$(IntermediateOutputPath)macho_addend_rewriter&quot; &quot;$(MSBuildProjectDirectory)/macho_addend_rewriter.c&quot;" />
+    <Exec Command="/bin/chmod +x &quot;$(IntermediateOutputPath)macho_addend_rewriter&quot;" />
+  </Target>
+</Project>

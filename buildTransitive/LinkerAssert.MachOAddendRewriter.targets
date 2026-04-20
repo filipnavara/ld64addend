@@ -1,0 +1,30 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <LinkerAssertMachOAddendRewriterEnabled Condition="'$(LinkerAssertMachOAddendRewriterEnabled)' == ''">true</LinkerAssertMachOAddendRewriterEnabled>
+    <_LinkerAssertMachOAddendRewriterTool>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../tools/macho_addend_rewriter'))</_LinkerAssertMachOAddendRewriterTool>
+  </PropertyGroup>
+
+  <Target Name="LinkerAssertRewriteIlcOutputs"
+          AfterTargets="IlcCompile"
+          Condition="'$(LinkerAssertMachOAddendRewriterEnabled)' == 'true' and '$([MSBuild]::IsOSPlatform(`OSX`))' == 'true'">
+    <ItemGroup>
+      <_LinkerAssertManagedBinary Include="@(ManagedBinary)"
+                                  Condition="'%(ManagedBinary.IlcOutputFile)' != '' and Exists('%(ManagedBinary.IlcOutputFile)')" />
+    </ItemGroup>
+
+    <Exec Command="/bin/chmod +x &quot;$(_LinkerAssertMachOAddendRewriterTool)&quot;"
+          Condition="'@(_LinkerAssertManagedBinary)' != '' and Exists('$(_LinkerAssertMachOAddendRewriterTool)')" />
+
+    <Error Text="LinkerAssert.MachOAddendRewriter could not find the packaged rewriter tool at '$(_LinkerAssertMachOAddendRewriterTool)'."
+           Condition="'@(_LinkerAssertManagedBinary)' != '' and !Exists('$(_LinkerAssertMachOAddendRewriterTool)')" />
+
+    <Message Text="Rewriting Mach-O addends in %(_LinkerAssertManagedBinary.IlcOutputFile)"
+             Importance="Low"
+             Condition="'@(_LinkerAssertManagedBinary)' != ''" />
+
+    <Exec Command="&quot;$(_LinkerAssertMachOAddendRewriterTool)&quot; &quot;%(_LinkerAssertManagedBinary.IlcOutputFile)&quot;"
+          Condition="'@(_LinkerAssertManagedBinary)' != ''"
+          StandardOutputImportance="Low"
+          StandardErrorImportance="High" />
+  </Target>
+</Project>
