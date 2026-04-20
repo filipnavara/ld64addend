@@ -1,0 +1,28 @@
+name: Build and publish NuGet
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup .NET
+        uses: emclient/setup-dotnet@master
+        with:
+          channel: "8.0"
+      - name: Build NuGet
+        run: dotnet pack -o .artifacts
+      - name: Publish
+        env:
+          token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dotnet nuget add source https://nuget.pkg.github.com/emclient/index.json -n github
+          dotnet nuget push '.artifacts/*.nupkg' -s github --api-key ${{ secrets.GITHUB_TOKEN }}
