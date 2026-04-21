@@ -25,8 +25,7 @@
     <None Include="$(IntermediateOutputPath)macho_addend_rewriter"
           Pack="true"
           PackagePath="tools/"
-          Visible="false"
-          Condition="Exists('$(IntermediateOutputPath)macho_addend_rewriter')" />
+          Visible="false" />
   </ItemGroup>
 
   <Target Name="BuildMachOAddendRewriter" BeforeTargets="GenerateNuspec">
